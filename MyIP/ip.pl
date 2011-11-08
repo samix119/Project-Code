@@ -4,4 +4,4 @@ use CGI;
 my $q = CGI->new;
 
 print $q->header();
-print $q->remote_host();
+print $q->remote_addr();
