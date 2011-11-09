@@ -1,6 +1,7 @@
 <?php
 # Logging in with Google accounts requires setting special identity, so this example shows how to do it.
 require 'openid.php';
+require 'manage_cookies.php';
 try {
     # Change 'localhost' to your domain name.
     $openid = new LightOpenID('manage.email360api.com');
@@ -32,7 +33,8 @@ try {
 	}
 	## login has been successful, now set cookie and redirect to the next page
 	$array = $openid->getAttributes();
-	setcookie("user",$array['contact/email'],time()+3600);
+	setcookie("user",encryptCookie($array['contact/email']),time()+3600);
+	header('http://manage.email360api.com/welcome.html');
     }
 } catch(ErrorException $e) {
     echo $e->getMessage();
