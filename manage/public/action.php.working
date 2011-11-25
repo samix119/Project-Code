@@ -1,0 +1,164 @@
+<?php
+require '../lib/manage_functions.php';
+require '../lib/config.php';
+
+## check if the user is authenticated and what is the username
+session_start();
+
+if(isset($_SESSION['username'])) {
+	## We know who the user is
+	$user = $_SESSION['username'];
+} else {
+	header('Location: http://manage.email360api.com/auth.php');
+	exit;
+}
+
+##fine, the user has a session
+if((!isset($_POST['v'])) or (!isset($_POST['c'])) or (!isset($_POST['i']))or (!isset($_POST['s'])) or (!isset($_POST['p']))) {
+	header('Location: http://manage.email360api.com/' . $splash_page );
+	exit;
+}
+
+##variables are set, give the user option to stop, start, reboot the vm's
+$servername = $_POST['v'];
+$ctid = $_POST['c'];
+$ip = $_POST['i'];
+$status = $_POST['s'];
+$parent = $_POST['p'];
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Viva Connect | Server Management</title>
+<link rel="stylesheet" type="text/css" href="action.css" media="all">
+</head>
+
+<body id="main_body" >
+<div id="form_container">
+<div style="position: relative; float: left; ">
+<img id="top1" src="viva.png" alt="">
+</div>
+
+<div class="index_bottom">
+<a class="indexa" href="index.php">Home</a>
+<t class="index">&nbsp;&nbsp;|&nbsp;&nbsp;</t>
+<a class="indexa" href="contact.php">Contact</a>
+<t class="index">&nbsp;&nbsp;|&nbsp;&nbsp;</t>
+<a class="indexa" href="logout.php">Logoff(<?php echo $user ?>)</a>
+<t class="index">&nbsp;&nbsp;</t>
+</div>
+
+<img id="top" src="top.png" alt="">
+<div class="form_description">
+<h2>&nbsp;Viva Connect | Server Management</h2>
+&nbsp;Control panel for servers and services
+<div>
+</div>
+</div>
+
+<p class="servername">&nbsp;<?php echo "$servername($ip)";?> - <?php echo $status;?></p>
+
+
+<div class="actions">
+<form action="vmaction.php" method="post">
+<input type="hidden" name="cmd" value="vst">
+<input type="hidden" name="c" value="<?php echo $ctid;?>">
+<input type="hidden" name="p" value="<?php echo $parent;?>">
+<input class="starticon" type="button">
+<p class="action">start vm</p>
+</div>
+
+<div class="actions">
+<form action="vmaction.php" method="post">
+<input type="hidden" name="cmd" value="vre">
+<input type="hidden" name="c" value="<?php echo $ctid;?>">
+<input type="hidden" name="p" value="<?php echo $parent;?>">
+<input class="restarticon" type="button">
+<p class="action">restart vm</p>
+</div>
+
+
+<div class="actions">
+<form action="vmaction.php" method="post">
+<input type="hidden" name="cmd" value="vsp">
+<input type="hidden" name="c" value="<?php echo $ctid;?>">
+<input type="hidden" name="p" value="<?php echo $parent;?>">
+<input class="stopicon" type="button">
+<p class="action">&nbsp;stop vm</p>
+</div>
+
+<div style="position: absolute; top: 300px;">
+<img class="actionsep" src="top.png" alt="">
+<p class="servername">&nbsp;<?php echo "$servername($ip)";?> - Postfix</p>
+
+<div class="actions">
+<form action="postaction.php" method="post">
+<input type="hidden" name="cmd" value="pst">
+<input type="hidden" name="c" value="<?php echo $ctid;?>">
+<input type="hidden" name="p" value="<?php echo $parent;?>">
+<input class="starticon" type="button">
+<p class="action">postfix start</p>
+</div>
+
+<div class="actions">
+<form action="postaction.php" method="post">
+<input type="hidden" name="cmd" value="pre">
+<input type="hidden" name="c" value="<?php echo $ctid;?>">
+<input type="hidden" name="p" value="<?php echo $parent;?>">
+<input class="restarticon" type="button">
+<p class="action">postfix restart</p>
+</div>
+
+<div class="actions">
+<form action="postaction.php" method="post">
+<input type="hidden" name="cmd" value="psp">
+<input type="hidden" name="c" value="<?php echo $ctid;?>">
+<input type="hidden" name="p" value="<?php echo $parent;?>">
+<input class="stopicon" type="button">
+<p class="action">postfix stop</p>
+</div>
+
+<div class="actions">
+<form action="postaction.php" method="post">
+<input type="hidden" name="cmd" value="prl">
+<input type="hidden" name="c" value="<?php echo $ctid;?>">
+<input type="hidden" name="p" value="<?php echo $parent;?>">
+<input class="postreload" type="button">
+<p class="action">postfix reload</p>
+</div>
+
+<div class="actions">
+<form action="postaction.php" method="post">
+<input type="hidden" name="cmd" value="pfl">
+<input type="hidden" name="c" value="<?php echo $ctid;?>">
+<input type="hidden" name="p" value="<?php echo $parent;?>">
+<input class="postflush" type="button">
+<p class="action">postfix flush</p>
+</div>
+
+<div class="actions">
+<form action="postaction.php" method="post">
+<input type="hidden" name="cmd" value="pfl">
+<input type="hidden" name="c" value="<?php echo $ctid;?>">
+<input type="hidden" name="p" value="<?php echo $parent;?>">
+<input class="postpurge" type="button">
+<p class="action">postfix purge</p>
+<br>
+<br>
+<br>
+<br>
+</div>
+
+<div style="position: absolute; top: 300px;">
+
+</div>
+
+
+
+</div>
+
+</body>
+</html>
+

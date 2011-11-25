@@ -1,0 +1,79 @@
+<?php
+#require 'manage_cookies.php';
+
+## check if the use is already logged in or we need to send him to the login page
+#if (isset($_COOKIE["user"])) {
+#	$user = decryptCookie($_COOKIE["user"]);
+#	setcookie("user",encryptCookie($user),time()+3600);
+#} else {
+#	header('Location: http://manage.email360api.com/index.php');
+#	exit;
+#}
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Viva Connect | Server Management</title>
+<link rel="stylesheet" type="text/css" href="view.css" media="all">
+
+</head>
+<body id="main_body" >
+<img id="top1" src="viva.png" alt="">
+<img id="top" src="top.png" alt="">
+
+
+<div id="form_container">
+<h1><a>Viva Connect| Server Management </a></h1>
+<form id="form_135723" class="appnitro">
+<div class="form_description">
+<h2>Viva Connect | Server Management</h2>
+Control panel for servers and services
+<div id="welcome">
+<?php echo "Welcome, $user <a href=\"logout.php\">(logoff)</a>"; ?>
+</div>
+</div>
+
+
+<?php
+require 'config.php';
+
+## get the list of servers now and generate the tables thus
+foreach($parentid as $pid) {
+	echo "
+	<table id=\"ServerList\" cellspacing=\"0\" summary=\"Virtual containers hosted on parent$pid\.email360api\.com\">
+	</tr>
+	<caption> VM's on Parent-$pid</caption>
+	<tr>
+	  <th scope=\"col\" abbr=\"Servername\">Servername</th>
+	  <th scope=\"col\" abbr=\"Ip Addr\">Ip Addr</th>
+	  <th scope=\"col\" abbr=\"Status\">Status</th>
+	</tr>";
+
+	$output = array();
+	exec("sudo -u sysad /opt/scripts/control-panel/get_vz_list.sh $pid", $output);
+	foreach($output as $a) {
+		$b = preg_split('/ +/',$a);
+		echo "
+		<tr>
+		  <td><a href=action.php?server=$b[0]&ctid=$b[3]>$b[0]</a></td>
+		  <td>$b[1]</td>
+		  <td>$b[2]</td>
+		</tr>";
+	}
+	echo "</table>";
+	echo "<br>";
+	echo "<img id=\"bottom\" src=\"bottom.png\" />";
+	echo "<br>";
+	echo "<br>";
+}
+?>
+<div id="footer">
+Powered by <a href="http://madinix.com">Madinix</a>
+</div>
+</div>
+<img id="bottom" src="bottom.png" alt="">
+</body>
+</html>
+

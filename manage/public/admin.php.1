@@ -1,0 +1,72 @@
+<?php
+require '../lib/manage_functions.php';
+require '../lib/config.php';
+require '../lib/commands.php';
+
+## check if the user is authenticated and what is the username
+session_start();
+$id = session_id();
+
+if(isset($_SESSION['username'])) {
+	## We know who the user is
+	$user = $_SESSION['username'];
+	if (strcmp('admin',$user)) {
+                header('Location: http://manage.email360api.com/' . $admin_page);
+                exit;
+        }
+	syslog(LOG_NOTICE, "manage: worker.php: client: {$_SERVER['REMOTE_ADDR']}, user: $user, sess_id: $id, loading admin");
+} else {
+	syslog(LOG_NOTICE, "manage: worker.php: client: {$_SERVER['REMOTE_ADDR']}, user: unset, sess_id: unset, redirecting auth.php");
+	header('Location: http://manage.email360api.com/' . $auth_page);
+	exit;
+}
+
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Viva Connect | Server Management</title>
+<link rel="stylesheet" type="text/css" href="admin.css" media="all">
+</head>
+
+<body id="main_body" >
+<div id="form_container">
+<div style="position: relative; float: left; ">
+<img id="top1" src="viva.png" alt="">
+</div>
+
+<div class="index_bottom">
+<a class="indexa" href="index.php">Home</a>
+<t class="index">&nbsp;&nbsp;|&nbsp;&nbsp;</t>
+<a class="indexa" href="contact.php">Contact</a>
+<t class="index">&nbsp;&nbsp;|&nbsp;&nbsp;</t>
+<a class="indexa" href="logout.php">Logoff(<?php echo $user ?>)</a>
+<t class="index">&nbsp;&nbsp;</t>
+</div>
+
+<img id="top" src="top.png" alt="">
+<div class="form_description">
+<h2>&nbsp;Viva Connect | Server Management</h2>
+&nbsp;Control panel for servers and services
+</div>
+<p class="action">&nbsp;add emailaddress</p>
+<form action="" post="">
+<div style="float:left;width:100px;height:100px;">
+&nbsp;<input name="emailaddress" type="text" maxlength="50" value="" onblur="this.value=removeSpaces(this.value)"/>
+</div>
+<div style="float:left;width:100px;height:100px;">
+<button class="addicon" type="submit"></button>
+</div>
+
+
+</form>
+
+</div>
+</div>
+</div>
+
+</body>
+</html>
+

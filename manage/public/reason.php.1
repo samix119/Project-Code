@@ -1,0 +1,90 @@
+<?php
+require '../lib/manage_functions.php';
+require '../lib/config.php';
+
+## check if the user is authenticated and what is the username
+session_start();
+
+if(isset($_SESSION['username'])) {
+	## We know who the user is
+	$user = $_SESSION['username'];
+} else {
+	header('Location: http://manage.email360api.com/auth.php');
+	exit;
+}
+
+
+##fine, the user has a session
+if((!isset($_POST['cmd'])) or (!isset($_POST['c'])) or (!isset($_POST['p'])) or (!isset($_POST['p'])) or  (!isset($_POST['dsc'])) ) {
+	header('Location: http://manage.email360api.com/' . $splash_page );
+	exit;
+}
+
+##variables are set, give the user option to stop, start, reboot the vm's
+$servername = $_POST['v'];
+$ctid = $_POST['c'];
+$parent = $_POST['p'];
+$cmd = $_POST['cmd'];
+$dsc = $_POST['dsc'];
+
+syslog(LOG_NOTICE, "{$_SERVER['REMOTE_ADDR']}: reason.php, user:$user, servername:$servername, ctid:$ctid, parent:$parent, cmd:$cmd, dsc:$dsc");
+
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Viva Connect | Server Management</title>
+<link rel="stylesheet" type="text/css" href="reason.css" media="all">
+</head>
+
+<body id="main_body" >
+<div id="form_container">
+<div style="position: relative; float: left; ">
+<img id="top1" src="viva.png" alt="">
+</div>
+
+<div class="index_bottom">
+<a class="indexa" href="index.php">Home</a>
+<t class="index">&nbsp;&nbsp;|&nbsp;&nbsp;</t>
+<a class="indexa" href="contact.php">Contact</a>
+<t class="index">&nbsp;&nbsp;|&nbsp;&nbsp;</t>
+<a class="indexa" href="logout.php">Logoff(<?php echo $user ?>)</a>
+<t class="index">&nbsp;&nbsp;</t>
+</div>
+
+<img id="top" src="top.png" alt="">
+<div class="form_description">
+<h2>&nbsp;Viva Connect | Server Management</h2>
+&nbsp;Control panel for servers and services
+<div>
+</div>
+</div>
+
+<div style="float: left;">
+<form action="worker.php" method="post">
+<textarea class="divtextarea" rows="10" cols="40" name="reason">
+
+<?php echo "reason for $dsc ?"; ?>
+
+</textarea>
+</div>
+<div>
+<input type="hidden" name="cmd" value="<?php echo $cmd;?>">
+<input type="hidden" name="c" value="<?php echo $ctid;?>">
+<input type="hidden" name="p" value="<?php echo $parent;?>">
+<input type="hidden" name="v" value="<?php echo $servername;?>">
+<input type="hidden" name="dsc" value="<?php echo $dsc;?>">
+<button class="okicon" type="submit"></button>
+<div>
+<a href="index.php"><img class="cancelicon" src="cancel.png" /></a>
+</div>
+</form>
+</div>
+
+</div>
+
+</body>
+</html>
+

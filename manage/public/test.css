@@ -1,0 +1,13 @@
+.divimage {
+	float: left;
+	height: 100px;
+	width: 6px;
+	top: 200px;
+	left: 600px;
+	position: absolute;
+}
+
+.image {
+	height: 500px;
+	width: 5px;
+}
