@@ -1,0 +1,111 @@
+#!/usr/bin/perl
+use strict;
+
+# syslog
+use Sys::Syslog qw(:DEFAULT setlogsock);
+setlogsock('unix');
+openlog('check_infra','','info');
+
+## collect the command line options
+use Getopt::Std;
+my %options = ();
+getopts("s:i:f:t:u:p:", \%options);
+
+my $smtpserver = $options{s};
+my $imapserver = $options{i}; 
+my $fromemail = $options{f};
+my $toemail = $options{t};
+my $imap_user = $options{u};
+my $imap_pass = $options{p};
+
+if ((!defined($smtpserver)) or (!defined($imapserver)) or (!defined($imap_user)) or (!defined($imap_pass))) {
+	print "usage: $0 -s SMTPSERVER -s IMAPSERVER -u USER -p PASS\n";
+	exit 1;
+}
+
+
+my $key = 'infra_header_check' . ':' . $smtpserver . ':';
+verify_msg_key($imapserver, $imap_user, $imap_pass, $key);
+
+sub verify_msg_key {
+
+my ($imapserver, $user, $password, $key) = @_;
+use Mail::IMAPClient;
+
+my $imap = Mail::IMAPClient->new(
+    Server   => $imapserver,
+    User     => $user,
+    Password => $password,
+    Port     => 993,
+    Ssl      => 1,
+    Uid      => 1,
+    Debug    => 0,
+) or catch_n_report("infracheck: $imapserver: cannot connect to imap server\n\nplease note this means that mail sending was successful but I was unable to connect to the IMAP server to verify the following key $key",$imapserver);
+
+$imap->select('infracheckmails') or catch_n_report("infracheck: $imapserver: cannot select INBOX",$imapserver);
+my @msgs = $imap->search("header subject $key");
+
+my $dkim_errors = 0;
+my $spf_errors = 0;
+my $dkim_result;
+my $spf_result;
+my $message_count;
+my @resultset;
+
+## fetch the email and check for SPF headers
+if(defined(@msgs)) {
+        foreach(@msgs) {
+		$message_count++;
+		my $header = $imap->get_header($_,"Authentication-Results");
+
+		$header =~ m/; spf=(\w+).+; dkim=(\w+)/;
+		$spf_result = $1;
+		$dkim_result = $2;
+
+		push(@resultset, "UID=$_: spf=$spf_result dkim=$dkim_result");
+
+		if ( $spf_result !~ /pass/ ) {
+			$spf_errors++;
+		}
+
+		if ( $dkim_result !~ /pass/ ) {
+			$dkim_errors++;
+		}
+		
+		## now delete the message
+        	$imap->delete_message($_) or warn "infracheck: $imapserver: cannot delete message";
+       		$imap->expunge;
+        }
+	$imap->logout;
+
+	## now time to display the results
+} else {
+	$imap->logout;
+	print "Found 0 messages\n";
+        exit 1;
+}
+
+if (($spf_errors eq 0) and ($dkim_errors eq 0)) {
+	print "SPF:OK DKIM:OK\n";
+} elsif(($spf_errors ne 0) and ($dkim_errors eq 0)) {
+	print "SPF:FAULTY DKIM:OK\n";
+} elsif(($spf_errors eq 0) and ($dkim_errors ne 0)) {
+	print "SPF:OK DKIM:FAULTY\n";
+} elsif(($spf_errors ne 0) and ($dkim_errors ne 0)) {
+	print "SPF:FAULTY DKIM:FAULTY\n";
+}
+
+
+print "Found $message_count message(s)\n";
+foreach(@resultset) {
+	print "$_\n";
+}
+
+if (($dkim_errors eq 0) and ($spf_errors eq 0)) {
+	exit 0;
+} else {
+	exit 2
+}
+
+
+}
