@@ -2,15 +2,18 @@
 
 
 ## Special thanks to rindolf from perl channel #perl on freenode for the regex.
+use strict;
+use warnings;
+
 use Sys::Hostname;
-$host = hostname;
+my $host = hostname;
 
 
-$string = "$host";
-$labels = split(/\./, $host);
-$labels=$labels - 3;
+my $string = "$host";
+my $labels = split(/\./, $host);
+$labels-=3;
 
-for($i=0;$i<=$labels;$i++){
+for(my $i=0;$i<=$labels;$i++){
         $string = $string . ',';
         $host  =~ s/^[^.]+\.//;
         $string = $string . $host;
