@@ -1,0 +1,28 @@
+#!/bin/bash
+
+## Assuming that things are ok
+RETVAL=0
+
+for i in `/usr/sbin/vzlist  -octid -H | sed 's/\ *//g'`
+do
+  egrep -A23 $i: /proc/user_beancounters | awk {'print $NF'} | grep -qv 0
+  if [ $? -eq 1 ]
+  then
+        RETVAL=`expr $RETVAL + 0`
+        OK_NODE="$OK_NODE $i"
+  else
+        RETVAL=`expr $RETVAL + 1`
+        FAIL_NODE="$FAIL_NODE `vzlist -octid,hostname | awk /$i\ /{'print $2'}| sed s/\.email360api\.com\//g`"
+  fi
+done
+
+if [ $RETVAL -eq 0 ]
+then
+        echo "No fail count detected on node(s)"
+        echo "$OK_NODE" | sed 's/^ //g'
+        exit 0
+else
+        echo "Failcount detected on node(s)$FAIL_NODE"
+        exit 2
+fi
+

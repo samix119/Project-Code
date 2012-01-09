@@ -1,0 +1,8 @@
+# Don't clog the mail system every five-minutes.
+MAILTO=""
+
+# Run sysmon script every five minutes
+*/5 * * * * sysmon /opt/scripts/sysmon.sh
+
+# Delete files older than 30 days
+0 0 * * * sysmon (/usr/bin/find ~/ -type d -mtime +30 -exec rm -fr '{}' ';')

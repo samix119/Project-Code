@@ -6,16 +6,16 @@ use strict;
 use warnings;
 
 use Sys::Hostname;
+use constant LIMIT => 3;
 my $host = hostname;
 
 
 my $string = "$host";
 my $labels = split(/\./, $host);
-$labels-=3;
+$labels-=LIMIT;
 
 for(my $i=0;$i<=$labels;$i++){
-        $string = $string . ',';
         $host  =~ s/^[^.]+\.//;
-        $string = $string . $host;
+        $string .= ",$host";
 }
 print "$string\n";
